@@ -21,6 +21,7 @@ vi.mock("@traceroot/core", () => ({
     XAI: "xai",
     MOONSHOT: "moonshot",
     ZAI: "zai",
+    TYPESAFE: "typesafe",
   },
   ADAPTER_DEFAULT_BASE_URL: {
     openai: "https://api.openai.com/v1",
@@ -31,6 +32,7 @@ vi.mock("@traceroot/core", () => ({
     xai: "https://api.x.ai/v1",
     moonshot: "https://api.moonshot.ai/v1",
     zai: "https://open.bigmodel.cn/api/paas/v4",
+    typesafe: "https://api.typesafe.ai/v1",
   },
   prisma: {
     modelProvider: {
@@ -327,6 +329,7 @@ describe("POST model-providers/test - error responses", () => {
     { adapter: "moonshot", apiKey: "k" },
     { adapter: "zai", apiKey: "k" },
     { adapter: "azure", apiKey: "k", baseUrl: "https://my.openai.azure.com/" },
+    { adapter: "typesafe", apiKey: "k" },
   ];
 
   for (const body of httpErrorAdapters) {
@@ -388,6 +391,15 @@ describe("POST model-providers/test - error responses", () => {
     });
     const res = await POST(makeRequest({ adapter: "anthropic", apiKey: "bad" }), makeParams());
     expect(await res.json()).toEqual({ success: false, error: "Invalid API key" });
+  });
+
+  it("typesafe sends the key as a Bearer token", async () => {
+    fetchMock.mockResolvedValue(okResponse());
+    await POST(makeRequest({ adapter: "typesafe", apiKey: "ts-key" }), makeParams());
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://api.typesafe.ai/v1/models",
+      expect.objectContaining({ headers: { Authorization: "Bearer ts-key" } }),
+    );
   });
 
   it("anthropic 403 maps to API lacks permission", async () => {

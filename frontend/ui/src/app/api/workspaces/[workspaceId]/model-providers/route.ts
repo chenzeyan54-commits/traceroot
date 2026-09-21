@@ -28,6 +28,7 @@ const ADAPTER_VALUES = [
   LLMAdapter.XAI,
   LLMAdapter.MOONSHOT,
   LLMAdapter.ZAI,
+  LLMAdapter.TYPESAFE,
 ] as const;
 
 const createSchema = z.object({
